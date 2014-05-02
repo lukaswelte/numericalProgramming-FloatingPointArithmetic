@@ -514,12 +514,16 @@ public class Gleitpunktzahl {
     public Gleitpunktzahl add(Gleitpunktzahl r) {
 
 		/*
-		 * TODO: hier ist die Operation add zu implementieren. Verwenden Sie die
 		 * Funktionen normalisiere, denormalisiere und die Funktionen add/sub
 		 * der BitFeldklasse. Achten Sie auf Sonderfaelle und die Einschraenkung
 		 * der Funktion BitFeld.sub.
 		 */
-        return new Gleitpunktzahl();
+        denormalisiere(this, r);
+        Gleitpunktzahl result = new Gleitpunktzahl();
+        result.exponent = this.exponent;
+        result.mantisse = this.mantisse.add(r.mantisse);
+        result.normalisiere(this.getAnzBitsMantisse());
+        return result;
     }
 
     /**
@@ -531,11 +535,11 @@ public class Gleitpunktzahl {
     public Gleitpunktzahl sub(Gleitpunktzahl r) {
 
 		/*
-		 * TODO: hier ist die Operation sub zu implementieren Verwenden Sie die
 		 * Funktionen normalisiere, denormalisiere und die Funktionen add/sub
 		 * der BitFeldklasse. Achten Sie auf Sonderfaelle und die Einschraenkung
 		 * der Funktion BitFeld.sub.
 		 */
+
         return new Gleitpunktzahl();
     }
 
