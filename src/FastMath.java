@@ -17,7 +17,7 @@ public class FastMath {
      * In literature, several of those constants for floats or doubles can be
      * found. There's no optimal constant for all cases.
      */
-    private static int MAGIC_NUMBER = 1024;
+    private static int MAGIC_NUMBER = 0x5F332318;
 
     /**
      * belegt die MAGIC_NUMBER mit dem Wert magic
@@ -41,12 +41,18 @@ public class FastMath {
      * @return Approximation for 1 / sqrt(x).
      */
     public static Gleitpunktzahl invSqrt(Gleitpunktzahl x) {
+        if (x.vorzeichen || x.isNull()) return Gleitpunktzahl.getNaN();
 
         BitFeld magicBits = new BitFeld(x.getAnzBitsExponent()
                 + x.getAnzBitsMantisse(), MAGIC_NUMBER);
 
-        return new Gleitpunktzahl();
-        /* TODO: hier den "fast inverse square root" Algorithmus implementieren */
+        BitFeld tmp = gleitpunktzahlToIEEE(x);
+
+        tmp.shiftRight(1, false);
+
+        tmp = magicBits.sub(tmp);
+
+        return iEEEToGleitpunktzahl(tmp);
     }
 
     /**

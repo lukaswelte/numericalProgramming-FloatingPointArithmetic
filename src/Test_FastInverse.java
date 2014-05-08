@@ -13,7 +13,7 @@ public class Test_FastInverse {
     /**
      * Beispielwerte fuer IEEE Standard mit 32 Bits
      */
-    private static int MAGIC_NUMBER = 0x5f3759df;
+    private static int MAGIC_NUMBER = 0x5F332318;
 
     private static int anzBitsExponent = 8;
     private static int anzBitsMantisse = 24;
@@ -32,6 +32,8 @@ public class Test_FastInverse {
         Gleitpunktzahl.setAnzBitsExponent(anzBitsExponent);
         Gleitpunktzahl.setAnzBitsMantisse(anzBitsMantisse);
         FastMath.setMagic(MAGIC_NUMBER);
+
+        //findAndSetMagicNumber();
 
         int numOfSamplingPts = 1001;
         float[] xData = new float[numOfSamplingPts];
@@ -59,5 +61,39 @@ public class Test_FastInverse {
         frame.setSize(960, 720);
         frame.setLocation(0, 0);
         frame.setVisible(true);
+    }
+
+    private static void findAndSetMagicNumber() {
+        int currentBestMagicNum = 0;
+        double magicNumAverageError = 123456789;
+        for (int magicNum = 1597186839; magicNum < 1597216840; magicNum += 1) {
+            FastMath.setMagic(magicNum);
+
+            int numOfSamplingPts = 1001;
+            float[] xData = new float[numOfSamplingPts];
+            float x = 0.10f;
+
+            double currentNumError = 0.0;
+
+		    /* calculate data to plot */
+            for (int i = 0; i < numOfSamplingPts; i++) {
+                xData[i] = x;
+                Gleitpunktzahl number = new Gleitpunktzahl(x);
+                double absError = FastMath.absInvSqrtErr(number);
+                currentNumError += absError;
+                x *= Math.pow(100.0d, 1.0d / numOfSamplingPts);
+            }
+
+            currentNumError = currentNumError / numOfSamplingPts;
+            if (currentNumError < magicNumAverageError) {
+                currentBestMagicNum = magicNum;
+                magicNumAverageError = currentNumError;
+            }
+        }
+
+        System.out.println("Magic Num: " + currentBestMagicNum);
+        System.out.println("Error of Num: " + magicNumAverageError);
+
+        FastMath.setMagic(currentBestMagicNum);
     }
 }

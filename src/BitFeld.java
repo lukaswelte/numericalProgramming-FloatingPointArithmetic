@@ -90,7 +90,7 @@ public class BitFeld {
      * liefert eine String-Repraesentation des Bitfelds
      */
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (int i = size - 1; i >= 0; i--) {
             if (bits[i])
                 s.append('1');
@@ -272,6 +272,7 @@ public class BitFeld {
 		 * Verwendung von toInt ist hier nicht gestattet, da die BitFeldklasse
 		 * auch fuer >32Bits funktionieren soll.
 		 */
+        assert (this.getSize() == b.getSize());
         int bitFieldLength = this.getSize() + 1;
         BitFeld result = new BitFeld(bitFieldLength);
         boolean carry = false;
@@ -307,32 +308,14 @@ public class BitFeld {
 		 * Verwendung von toInt ist hier nicht gestattet, da die BitFeldklasse
 		 * auch fuer >32Bits funktionieren soll.
 		 */
-        int bitFieldLength = this.getSize();
-        BitFeld result = new BitFeld(bitFieldLength);
+        assert (this.getSize() == b.getSize());
+
+        BitFeld result = new BitFeld(b.getSize());
         boolean carry = false;
-        boolean sum;
-        boolean secondBit;
-        boolean firstBit;
-
-        // Add all bits one by one
-        for (int i = bitFieldLength; i >= 0; i--) {
-            firstBit = this.bits[i];
-            secondBit = b.bits[i];
-
-            if (secondBit) {
-                if (firstBit) {
-                    sum = false;
-                } else {
-                    sum = true;
-                }
-            }
-            sum = firstBit ^ secondBit ^ carry;
-            result.bits[i] = sum;
-            carry = (firstBit & secondBit) | (secondBit & carry) | (firstBit & carry);
+        for (int i = 0; i < getSize(); i++) {
+            result.bits[i] = bits[i] ^ b.bits[i] ^ carry;
+            carry = !bits[i] && b.bits[i] || !bits[i] && carry || bits[i] && carry && b.bits[i];
         }
-
-        //handle overflow
-        result.bits[result.getSize() - 1] = carry;
         return result;
     }
 }

@@ -294,7 +294,7 @@ public class Gleitpunktzahl {
      * liefert eine String-Repraesentation des Objekts
      */
     public String toString() {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         if (this.vorzeichen)
             s.append('-');
         for (int i = this.mantisse.getSize() - 1; i >= 0; i--) {
@@ -405,9 +405,9 @@ public class Gleitpunktzahl {
      * vergleicht den Wert des aktuellen Objekts mit der reellen Zahl r
      */
     public int compareTo(Gleitpunktzahl r) {
-        if (this.vorzeichen == false && r.vorzeichen == true)
+        if (!this.vorzeichen && r.vorzeichen)
             return 1;
-        if (this.vorzeichen == true && r.vorzeichen == false)
+        if (this.vorzeichen && !r.vorzeichen)
             return -1;
         int compabs = compareAbsTo(r);
         if (!this.vorzeichen)
@@ -518,12 +518,46 @@ public class Gleitpunktzahl {
 		 * der BitFeldklasse. Achten Sie auf Sonderfaelle und die Einschraenkung
 		 * der Funktion BitFeld.sub.
 		 */
-        denormalisiere(this, r);
-        Gleitpunktzahl result = new Gleitpunktzahl();
-        result.exponent = this.exponent;
-        result.mantisse = this.mantisse.add(r.mantisse);
-        result.normalisiere(this.getAnzBitsMantisse());
-        return result;
+        if (this.isInfinite() && r.isInfinite()) {
+            if (this.vorzeichen == r.vorzeichen) {
+                return new Gleitpunktzahl(this);
+            } else {
+                return getNaN();
+            }
+        } else if (this.isInfinite()) {
+            return new Gleitpunktzahl(this);
+        } else if (r.isInfinite()) {
+            return new Gleitpunktzahl(r);
+        } else if (this.isNull()) {
+            return new Gleitpunktzahl(r);
+        } else if (r.isNull()) {
+            return new Gleitpunktzahl(this);
+        } else {
+            denormalisiere(this, r);
+            Gleitpunktzahl result = new Gleitpunktzahl();
+
+            if (this.vorzeichen == r.vorzeichen) {
+                result.mantisse = this.mantisse.add(r.mantisse);
+                result.vorzeichen = this.vorzeichen;
+            } else {
+                if (this.compareAbsTo(r) == 1) {
+                    result.mantisse = this.mantisse.sub(r.mantisse);
+                    result.vorzeichen = this.vorzeichen;
+                } else if (r.compareAbsTo(this) == 1) {
+                    result.mantisse = r.mantisse.sub(this.mantisse);
+                    result.vorzeichen = r.vorzeichen;
+                } else {
+                    return getNull();
+                }
+
+            }
+            result.exponent = new BitFeld(this.exponent);
+            this.normalisiere(anzBitsMantisse - 1);
+            r.normalisiere(anzBitsMantisse - 1);
+            result.normalisiere(anzBitsMantisse - 1);
+
+            return result;
+        }
     }
 
     /**
@@ -533,14 +567,16 @@ public class Gleitpunktzahl {
      * gespeichert, normiert, und dieses wird zurueckgegeben.
      */
     public Gleitpunktzahl sub(Gleitpunktzahl r) {
-
 		/*
 		 * Funktionen normalisiere, denormalisiere und die Funktionen add/sub
 		 * der BitFeldklasse. Achten Sie auf Sonderfaelle und die Einschraenkung
 		 * der Funktion BitFeld.sub.
 		 */
+        r.vorzeichen = !r.vorzeichen;
+        Gleitpunktzahl result = add(r);
+        r.vorzeichen = !r.vorzeichen;
 
-        return new Gleitpunktzahl();
+        return result;
     }
 
 }
